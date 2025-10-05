@@ -3,7 +3,7 @@ package parser
 import (
 	"fmt"
 	"strconv"
-	
+
 	"relational-db/internal/lexer"
 )
 
@@ -21,11 +21,11 @@ func NewParser(l *lexer.Lexer) *Parser {
 		lexer:  l,
 		errors: []string{},
 	}
-	
+
 	// Read two tokens, so currentToken and peekToken are both set
 	p.nextToken()
 	p.nextToken()
-	
+
 	return p
 }
 
@@ -42,7 +42,7 @@ func (p *Parser) Errors() []string {
 
 // addError adds an error message
 func (p *Parser) addError(msg string) {
-	p.errors = append(p.errors, fmt.Sprintf("Parse error at line %d, column %d: %s", 
+	p.errors = append(p.errors, fmt.Sprintf("Parse error at line %d, column %d: %s",
 		p.currentToken.Line, p.currentToken.Column, msg))
 }
 
@@ -90,43 +90,43 @@ func (p *Parser) ParseStatement() Statement {
 // parseSelectStatement parses SELECT statements
 func (p *Parser) parseSelectStatement() *SelectStatement {
 	stmt := &SelectStatement{}
-	
+
 	// Parse SELECT clause
 	stmt.SelectClause = p.parseSelectClause()
 	if stmt.SelectClause == nil {
 		return nil
 	}
-	
+
 	// Parse FROM clause (optional)
 	if p.currentTokenIs(lexer.FROM) {
 		stmt.FromClause = p.parseFromClause()
 	}
-	
+
 	// Parse WHERE clause (optional)
 	if p.currentTokenIs(lexer.WHERE) {
 		stmt.WhereClause = p.parseWhereClause()
 	}
-	
+
 	// Parse GROUP BY clause (optional)
 	if p.currentTokenIs(lexer.GROUP) {
 		stmt.GroupBy = p.parseGroupByClause()
 	}
-	
+
 	// Parse HAVING clause (optional)
 	if p.currentTokenIs(lexer.HAVING) {
 		stmt.Having = p.parseHavingClause()
 	}
-	
+
 	// Parse ORDER BY clause (optional)
 	if p.currentTokenIs(lexer.ORDER) {
 		stmt.OrderBy = p.parseOrderByClause()
 	}
-	
+
 	// Parse LIMIT clause (optional)
 	if p.currentTokenIs(lexer.LIMIT) {
 		stmt.Limit = p.parseLimitClause()
 	}
-	
+
 	return stmt
 }
 
@@ -135,15 +135,15 @@ func (p *Parser) parseSelectClause() *SelectClause {
 	if !p.expectToken(lexer.SELECT) {
 		return nil
 	}
-	
+
 	clause := &SelectClause{}
-	
+
 	// Check for DISTINCT
 	if p.currentTokenIs(lexer.DISTINCT) {
 		clause.Distinct = true
 		p.nextToken()
 	}
-	
+
 	// Parse column list
 	for {
 		expr := p.parseExpression()
@@ -151,13 +151,13 @@ func (p *Parser) parseSelectClause() *SelectClause {
 			return nil
 		}
 		clause.Columns = append(clause.Columns, expr)
-		
+
 		if !p.currentTokenIs(lexer.COMMA) {
 			break
 		}
 		p.nextToken() // consume comma
 	}
-	
+
 	return clause
 }
 
@@ -166,9 +166,9 @@ func (p *Parser) parseFromClause() *FromClause {
 	if !p.expectToken(lexer.FROM) {
 		return nil
 	}
-	
+
 	clause := &FromClause{}
-	
+
 	// Parse table list
 	for {
 		expr := p.parseExpression()
@@ -176,24 +176,24 @@ func (p *Parser) parseFromClause() *FromClause {
 			return nil
 		}
 		clause.Tables = append(clause.Tables, expr)
-		
+
 		if !p.currentTokenIs(lexer.COMMA) {
 			break
 		}
 		p.nextToken() // consume comma
 	}
-	
+
 	// Parse JOINs
-	for p.currentTokenIs(lexer.JOIN) || p.currentTokenIs(lexer.INNER) || 
+	for p.currentTokenIs(lexer.JOIN) || p.currentTokenIs(lexer.INNER) ||
 		p.currentTokenIs(lexer.LEFT) || p.currentTokenIs(lexer.RIGHT) {
-		
+
 		join := p.parseJoinClause()
 		if join == nil {
 			return nil
 		}
 		clause.Joins = append(clause.Joins, join)
 	}
-	
+
 	return clause
 }
 
@@ -202,12 +202,12 @@ func (p *Parser) parseWhereClause() *WhereClause {
 	if !p.expectToken(lexer.WHERE) {
 		return nil
 	}
-	
+
 	condition := p.parseExpression()
 	if condition == nil {
 		return nil
 	}
-	
+
 	return &WhereClause{Condition: condition}
 }
 
@@ -219,22 +219,22 @@ func (p *Parser) parseGroupByClause() *GroupByClause {
 	if !p.expectToken(lexer.BY) {
 		return nil
 	}
-	
+
 	clause := &GroupByClause{}
-	
+
 	for {
 		expr := p.parseExpression()
 		if expr == nil {
 			return nil
 		}
 		clause.Columns = append(clause.Columns, expr)
-		
+
 		if !p.currentTokenIs(lexer.COMMA) {
 			break
 		}
 		p.nextToken() // consume comma
 	}
-	
+
 	return clause
 }
 
@@ -243,12 +243,12 @@ func (p *Parser) parseHavingClause() *HavingClause {
 	if !p.expectToken(lexer.HAVING) {
 		return nil
 	}
-	
+
 	condition := p.parseExpression()
 	if condition == nil {
 		return nil
 	}
-	
+
 	return &HavingClause{Condition: condition}
 }
 
@@ -260,15 +260,15 @@ func (p *Parser) parseOrderByClause() *OrderByClause {
 	if !p.expectToken(lexer.BY) {
 		return nil
 	}
-	
+
 	clause := &OrderByClause{}
-	
+
 	for {
 		expr := p.parseExpression()
 		if expr == nil {
 			return nil
 		}
-		
+
 		direction := Ascending
 		if p.currentTokenIs(lexer.ASC) {
 			p.nextToken()
@@ -276,19 +276,19 @@ func (p *Parser) parseOrderByClause() *OrderByClause {
 			direction = Descending
 			p.nextToken()
 		}
-		
+
 		order := &OrderExpression{
 			Expression: expr,
 			Direction:  direction,
 		}
 		clause.Orders = append(clause.Orders, order)
-		
+
 		if !p.currentTokenIs(lexer.COMMA) {
 			break
 		}
 		p.nextToken() // consume comma
 	}
-	
+
 	return clause
 }
 
@@ -297,14 +297,14 @@ func (p *Parser) parseLimitClause() *LimitClause {
 	if !p.expectToken(lexer.LIMIT) {
 		return nil
 	}
-	
+
 	count := p.parseExpression()
 	if count == nil {
 		return nil
 	}
-	
+
 	clause := &LimitClause{Count: count}
-	
+
 	// Parse optional OFFSET
 	if p.currentTokenIs(lexer.OFFSET) {
 		p.nextToken()
@@ -314,14 +314,14 @@ func (p *Parser) parseLimitClause() *LimitClause {
 		}
 		clause.Offset = offset
 	}
-	
+
 	return clause
 }
 
 // parseJoinClause parses JOIN operations
 func (p *Parser) parseJoinClause() *JoinClause {
 	joinType := InnerJoin
-	
+
 	if p.currentTokenIs(lexer.LEFT) {
 		joinType = LeftJoin
 		p.nextToken()
@@ -337,16 +337,16 @@ func (p *Parser) parseJoinClause() *JoinClause {
 	} else if p.currentTokenIs(lexer.INNER) {
 		p.nextToken()
 	}
-	
+
 	if !p.expectToken(lexer.JOIN) {
 		return nil
 	}
-	
+
 	table := p.parseExpression()
 	if table == nil {
 		return nil
 	}
-	
+
 	var condition Expression
 	if p.currentTokenIs(lexer.ON) {
 		p.nextToken()
@@ -355,7 +355,7 @@ func (p *Parser) parseJoinClause() *JoinClause {
 			return nil
 		}
 	}
-	
+
 	return &JoinClause{
 		JoinType:  joinType,
 		Table:     table,
@@ -371,14 +371,14 @@ func (p *Parser) parseInsertStatement() *InsertStatement {
 	if !p.expectToken(lexer.INTO) {
 		return nil
 	}
-	
+
 	tableName := p.parseIdentifier()
 	if tableName == nil {
 		return nil
 	}
-	
+
 	stmt := &InsertStatement{TableName: tableName}
-	
+
 	// Parse optional column list
 	if p.currentTokenIs(lexer.LPAREN) {
 		p.nextToken()
@@ -388,7 +388,7 @@ func (p *Parser) parseInsertStatement() *InsertStatement {
 				return nil
 			}
 			stmt.Columns = append(stmt.Columns, col)
-			
+
 			if !p.currentTokenIs(lexer.COMMA) {
 				break
 			}
@@ -398,17 +398,17 @@ func (p *Parser) parseInsertStatement() *InsertStatement {
 			return nil
 		}
 	}
-	
+
 	// Parse VALUES clause
 	if !p.expectToken(lexer.VALUES) {
 		return nil
 	}
-	
+
 	for {
 		if !p.expectToken(lexer.LPAREN) {
 			return nil
 		}
-		
+
 		var values []Expression
 		for {
 			expr := p.parseExpression()
@@ -416,25 +416,25 @@ func (p *Parser) parseInsertStatement() *InsertStatement {
 				return nil
 			}
 			values = append(values, expr)
-			
+
 			if !p.currentTokenIs(lexer.COMMA) {
 				break
 			}
 			p.nextToken() // consume comma
 		}
-		
+
 		if !p.expectToken(lexer.RPAREN) {
 			return nil
 		}
-		
+
 		stmt.Values = append(stmt.Values, values)
-		
+
 		if !p.currentTokenIs(lexer.COMMA) {
 			break
 		}
 		p.nextToken() // consume comma
 	}
-	
+
 	return stmt
 }
 
@@ -443,51 +443,51 @@ func (p *Parser) parseUpdateStatement() *UpdateStatement {
 	if !p.expectToken(lexer.UPDATE) {
 		return nil
 	}
-	
+
 	tableName := p.parseIdentifier()
 	if tableName == nil {
 		return nil
 	}
-	
+
 	if !p.expectToken(lexer.SET) {
 		return nil
 	}
-	
+
 	stmt := &UpdateStatement{TableName: tableName}
-	
+
 	// Parse SET clauses
 	for {
 		col := p.parseIdentifier()
 		if col == nil {
 			return nil
 		}
-		
+
 		if !p.expectToken(lexer.EQUALS) {
 			return nil
 		}
-		
+
 		value := p.parseExpression()
 		if value == nil {
 			return nil
 		}
-		
+
 		setClause := &SetClause{
 			Column: col,
 			Value:  value,
 		}
 		stmt.SetClauses = append(stmt.SetClauses, setClause)
-		
+
 		if !p.currentTokenIs(lexer.COMMA) {
 			break
 		}
 		p.nextToken() // consume comma
 	}
-	
+
 	// Parse optional WHERE clause
 	if p.currentTokenIs(lexer.WHERE) {
 		stmt.WhereClause = p.parseWhereClause()
 	}
-	
+
 	return stmt
 }
 
@@ -499,19 +499,19 @@ func (p *Parser) parseDeleteStatement() *DeleteStatement {
 	if !p.expectToken(lexer.FROM) {
 		return nil
 	}
-	
+
 	tableName := p.parseIdentifier()
 	if tableName == nil {
 		return nil
 	}
-	
+
 	stmt := &DeleteStatement{TableName: tableName}
-	
+
 	// Parse optional WHERE clause
 	if p.currentTokenIs(lexer.WHERE) {
 		stmt.WhereClause = p.parseWhereClause()
 	}
-	
+
 	return stmt
 }
 
@@ -520,11 +520,11 @@ func (p *Parser) parseCreateStatement() Statement {
 	if !p.expectToken(lexer.CREATE) {
 		return nil
 	}
-	
+
 	if p.currentTokenIs(lexer.TABLE) {
 		return p.parseCreateTableStatement()
 	}
-	
+
 	p.addError("only CREATE TABLE is supported")
 	return nil
 }
@@ -534,22 +534,22 @@ func (p *Parser) parseCreateTableStatement() *CreateTableStatement {
 	if !p.expectToken(lexer.TABLE) {
 		return nil
 	}
-	
+
 	tableName := p.parseIdentifier()
 	if tableName == nil {
 		return nil
 	}
-	
+
 	if !p.expectToken(lexer.LPAREN) {
 		return nil
 	}
-	
+
 	stmt := &CreateTableStatement{TableName: tableName}
-	
+
 	for {
 		// Parse column definition or table constraint
-		if p.currentTokenIs(lexer.CONSTRAINT) || p.currentTokenIs(lexer.PRIMARY) || 
-		   p.currentTokenIs(lexer.FOREIGN) || p.currentTokenIs(lexer.UNIQUE) {
+		if p.currentTokenIs(lexer.CONSTRAINT) || p.currentTokenIs(lexer.PRIMARY) ||
+			p.currentTokenIs(lexer.FOREIGN) || p.currentTokenIs(lexer.UNIQUE) {
 			// Table constraint
 			constraint := p.parseTableConstraint()
 			if constraint == nil {
@@ -564,17 +564,17 @@ func (p *Parser) parseCreateTableStatement() *CreateTableStatement {
 			}
 			stmt.Columns = append(stmt.Columns, colDef)
 		}
-		
+
 		if !p.currentTokenIs(lexer.COMMA) {
 			break
 		}
 		p.nextToken() // consume comma
 	}
-	
+
 	if !p.expectToken(lexer.RPAREN) {
 		return nil
 	}
-	
+
 	return stmt
 }
 
@@ -583,11 +583,11 @@ func (p *Parser) parseDropStatement() Statement {
 	if !p.expectToken(lexer.DROP) {
 		return nil
 	}
-	
+
 	if p.currentTokenIs(lexer.TABLE) {
 		return p.parseDropTableStatement()
 	}
-	
+
 	p.addError("only DROP TABLE is supported")
 	return nil
 }
@@ -597,9 +597,9 @@ func (p *Parser) parseDropTableStatement() *DropTableStatement {
 	if !p.expectToken(lexer.TABLE) {
 		return nil
 	}
-	
+
 	stmt := &DropTableStatement{}
-	
+
 	// Check for IF EXISTS
 	if p.currentTokenIs(lexer.IF) {
 		p.nextToken()
@@ -611,13 +611,13 @@ func (p *Parser) parseDropTableStatement() *DropTableStatement {
 			return nil
 		}
 	}
-	
+
 	tableName := p.parseIdentifier()
 	if tableName == nil {
 		return nil
 	}
 	stmt.TableName = tableName
-	
+
 	return stmt
 }
 
@@ -627,17 +627,17 @@ func (p *Parser) parseColumnDefinition() *ColumnDefinition {
 	if name == nil {
 		return nil
 	}
-	
+
 	dataType := p.parseDataType()
 	if dataType == nil {
 		return nil
 	}
-	
+
 	colDef := &ColumnDefinition{
 		Name:     name,
 		DataType: dataType,
 	}
-	
+
 	// Parse column constraints
 	for {
 		constraint := p.parseColumnConstraint()
@@ -646,40 +646,40 @@ func (p *Parser) parseColumnDefinition() *ColumnDefinition {
 		}
 		colDef.Constraints = append(colDef.Constraints, constraint)
 	}
-	
+
 	return colDef
 }
 
 // parseDataType parses SQL data types
 func (p *Parser) parseDataType() *DataType {
-	if !p.currentTokenIs(lexer.INTEGER) && !p.currentTokenIs(lexer.TEXT) && 
-	   !p.currentTokenIs(lexer.REAL) && !p.currentTokenIs(lexer.BLOB) && 
-	   !p.currentTokenIs(lexer.BOOLEAN) {
+	if !p.currentTokenIs(lexer.INTEGER) && !p.currentTokenIs(lexer.TEXT) &&
+		!p.currentTokenIs(lexer.REAL) && !p.currentTokenIs(lexer.BLOB) &&
+		!p.currentTokenIs(lexer.BOOLEAN) {
 		p.addError("expected data type")
 		return nil
 	}
-	
+
 	dataType := &DataType{Name: p.currentToken.Value}
 	p.nextToken()
-	
+
 	// Parse optional length/precision
 	if p.currentTokenIs(lexer.LPAREN) {
 		p.nextToken()
-		
+
 		if !p.currentTokenIs(lexer.NUMBER) {
 			p.addError("expected number after (")
 			return nil
 		}
-		
+
 		length, err := strconv.Atoi(p.currentToken.Value)
 		if err != nil {
 			p.addError("invalid number")
 			return nil
 		}
-		
+
 		dataType.Length = length
 		p.nextToken()
-		
+
 		// Check for precision (e.g., DECIMAL(10,2))
 		if p.currentTokenIs(lexer.COMMA) {
 			p.nextToken()
@@ -687,24 +687,24 @@ func (p *Parser) parseDataType() *DataType {
 				p.addError("expected number after comma")
 				return nil
 			}
-			
+
 			scale, err := strconv.Atoi(p.currentToken.Value)
 			if err != nil {
 				p.addError("invalid number")
 				return nil
 			}
-			
+
 			dataType.Precision = dataType.Length
 			dataType.Scale = scale
 			dataType.Length = 0
 			p.nextToken()
 		}
-		
+
 		if !p.expectToken(lexer.RPAREN) {
 			return nil
 		}
 	}
-	
+
 	return dataType
 }
 
@@ -730,6 +730,7 @@ func (p *Parser) parseColumnConstraint() *ColumnConstraint {
 		p.nextToken()
 		value := p.parseExpression()
 		if value == nil {
+			p.addError("expected expression after DEFAULT")
 			return nil
 		}
 		return &ColumnConstraint{Type: Default, DefaultValue: value}
@@ -741,7 +742,7 @@ func (p *Parser) parseColumnConstraint() *ColumnConstraint {
 // parseTableConstraint parses table constraints
 func (p *Parser) parseTableConstraint() *TableConstraint {
 	constraint := &TableConstraint{}
-	
+
 	// Parse optional constraint name
 	if p.currentTokenIs(lexer.CONSTRAINT) {
 		p.nextToken()
@@ -750,7 +751,7 @@ func (p *Parser) parseTableConstraint() *TableConstraint {
 			return nil
 		}
 	}
-	
+
 	switch p.currentToken.Type {
 	case lexer.PRIMARY:
 		p.nextToken()
@@ -771,29 +772,29 @@ func (p *Parser) parseTableConstraint() *TableConstraint {
 		p.addError("expected constraint type")
 		return nil
 	}
-	
+
 	// Parse column list
 	if !p.expectToken(lexer.LPAREN) {
 		return nil
 	}
-	
+
 	for {
 		col := p.parseIdentifier()
 		if col == nil {
 			return nil
 		}
 		constraint.Columns = append(constraint.Columns, col)
-		
+
 		if !p.currentTokenIs(lexer.COMMA) {
 			break
 		}
 		p.nextToken() // consume comma
 	}
-	
+
 	if !p.expectToken(lexer.RPAREN) {
 		return nil
 	}
-	
+
 	// Parse REFERENCES clause for foreign keys
 	if constraint.Type == ForeignKey && p.currentTokenIs(lexer.REFERENCES) {
 		p.nextToken()
@@ -801,9 +802,9 @@ func (p *Parser) parseTableConstraint() *TableConstraint {
 		if refTable == nil {
 			return nil
 		}
-		
+
 		ref := &ForeignKeyReference{Table: refTable}
-		
+
 		if p.currentTokenIs(lexer.LPAREN) {
 			p.nextToken()
 			for {
@@ -812,7 +813,7 @@ func (p *Parser) parseTableConstraint() *TableConstraint {
 					return nil
 				}
 				ref.Columns = append(ref.Columns, col)
-				
+
 				if !p.currentTokenIs(lexer.COMMA) {
 					break
 				}
@@ -822,10 +823,10 @@ func (p *Parser) parseTableConstraint() *TableConstraint {
 				return nil
 			}
 		}
-		
+
 		constraint.References = ref
 	}
-	
+
 	return constraint
 }
 
@@ -840,7 +841,7 @@ func (p *Parser) parseLogicalOr() Expression {
 	if left == nil {
 		return nil
 	}
-	
+
 	for p.currentTokenIs(lexer.OR) {
 		p.nextToken()
 		right := p.parseLogicalAnd()
@@ -849,7 +850,7 @@ func (p *Parser) parseLogicalOr() Expression {
 		}
 		left = &BinaryExpression{Left: left, Operator: Or, Right: right}
 	}
-	
+
 	return left
 }
 
@@ -859,7 +860,7 @@ func (p *Parser) parseLogicalAnd() Expression {
 	if left == nil {
 		return nil
 	}
-	
+
 	for p.currentTokenIs(lexer.AND) {
 		p.nextToken()
 		right := p.parseComparison()
@@ -868,7 +869,7 @@ func (p *Parser) parseLogicalAnd() Expression {
 		}
 		left = &BinaryExpression{Left: left, Operator: And, Right: right}
 	}
-	
+
 	return left
 }
 
@@ -878,7 +879,7 @@ func (p *Parser) parseComparison() Expression {
 	if left == nil {
 		return nil
 	}
-	
+
 	for {
 		var op BinaryOperator
 		switch p.currentToken.Type {
@@ -903,7 +904,7 @@ func (p *Parser) parseComparison() Expression {
 		default:
 			return left
 		}
-		
+
 		p.nextToken()
 		right := p.parseAddition()
 		if right == nil {
@@ -919,7 +920,7 @@ func (p *Parser) parseAddition() Expression {
 	if left == nil {
 		return nil
 	}
-	
+
 	for p.currentTokenIs(lexer.PLUS) || p.currentTokenIs(lexer.MINUS) {
 		var op BinaryOperator
 		if p.currentTokenIs(lexer.PLUS) {
@@ -928,14 +929,14 @@ func (p *Parser) parseAddition() Expression {
 			op = Minus
 		}
 		p.nextToken()
-		
+
 		right := p.parseMultiplication()
 		if right == nil {
 			return nil
 		}
 		left = &BinaryExpression{Left: left, Operator: op, Right: right}
 	}
-	
+
 	return left
 }
 
@@ -945,7 +946,7 @@ func (p *Parser) parseMultiplication() Expression {
 	if left == nil {
 		return nil
 	}
-	
+
 	for p.currentTokenIs(lexer.MULTIPLY) || p.currentTokenIs(lexer.DIVIDE) || p.currentTokenIs(lexer.MODULO) {
 		var op BinaryOperator
 		switch p.currentToken.Type {
@@ -957,14 +958,14 @@ func (p *Parser) parseMultiplication() Expression {
 			op = Modulo
 		}
 		p.nextToken()
-		
+
 		right := p.parseUnary()
 		if right == nil {
 			return nil
 		}
 		left = &BinaryExpression{Left: left, Operator: op, Right: right}
 	}
-	
+
 	return left
 }
 
@@ -1033,19 +1034,19 @@ func (p *Parser) parseIdentifierExpression() Expression {
 	if name == nil {
 		return nil
 	}
-	
+
 	// Check if it's a function call
 	if p.currentTokenIs(lexer.LPAREN) {
 		p.nextToken()
-		
+
 		funcCall := &FunctionCall{Name: name}
-		
+
 		// Check for DISTINCT
 		if p.currentTokenIs(lexer.DISTINCT) {
 			funcCall.Distinct = true
 			p.nextToken()
 		}
-		
+
 		// Parse arguments
 		if !p.currentTokenIs(lexer.RPAREN) {
 			for {
@@ -1054,21 +1055,21 @@ func (p *Parser) parseIdentifierExpression() Expression {
 					return nil
 				}
 				funcCall.Arguments = append(funcCall.Arguments, arg)
-				
+
 				if !p.currentTokenIs(lexer.COMMA) {
 					break
 				}
 				p.nextToken() // consume comma
 			}
 		}
-		
+
 		if !p.expectToken(lexer.RPAREN) {
 			return nil
 		}
-		
+
 		return funcCall
 	}
-	
+
 	// Check if it's a qualified column reference (table.column)
 	if p.currentTokenIs(lexer.DOT) {
 		p.nextToken()
@@ -1083,7 +1084,7 @@ func (p *Parser) parseIdentifierExpression() Expression {
 		}
 		return &ColumnReference{Table: name, Column: column}
 	}
-	
+
 	// Simple identifier
 	return name
 }
@@ -1094,10 +1095,10 @@ func (p *Parser) parseIdentifier() *Identifier {
 		p.addError("expected identifier")
 		return nil
 	}
-	
+
 	identifier := &Identifier{Value: p.currentToken.Value}
 	p.nextToken()
-	
+
 	// Parse optional alias
 	if p.currentTokenIs(lexer.AS) {
 		p.nextToken()
@@ -1108,7 +1109,7 @@ func (p *Parser) parseIdentifier() *Identifier {
 		identifier.Alias = &Identifier{Value: p.currentToken.Value}
 		p.nextToken()
 	}
-	
+
 	return identifier
 }
 
@@ -1130,12 +1131,12 @@ func (p *Parser) parseStringLiteral() *Literal {
 func ParseSQL(sql string) (Statement, error) {
 	lexer := lexer.NewLexer(sql)
 	parser := NewParser(lexer)
-	
+
 	stmt := parser.ParseStatement()
-	
+
 	if len(parser.Errors()) > 0 {
 		return nil, fmt.Errorf("parse errors: %v", parser.Errors())
 	}
-	
+
 	return stmt, nil
 }

@@ -127,3 +127,21 @@ This is an early-stage project with basic structure in place. The main component
 - Client interface and networking (planned)
 
 When working on this codebase, focus on implementing the core database components in the `internal/` packages while maintaining clean interfaces in the `pkg/database/` public API.
+
+Phase 1 (Weeks 1-2): Parser Completion 🎯 START HERE
+    └─ Complete recursive descent parser for SELECT, INSERT, CREATE TABLE
+
+Phase 2 (Weeks 3-4): Schema Management
+    ├─ Catalog Manager (persist table schemas)
+    └─ Record Manager (serialize/deserialize records)
+
+Phase 3 (Weeks 5-6): Query Execution ⭐ MILESTONE
+    └─ Simple Executor (END-TO-END SQL QUERIES!)
+
+Phase 4 (Weeks 7-9): Transaction Support
+    ├─ Transaction Manager (ACID)
+    └─ WAL Manager (durability & crash recovery)
+
+Phase 5 (Weeks 10-12): Performance Optimization
+    ├─ B-Tree Indexes (fast lookups)
+    └─ Query Optimizer (intelligent plans)
