@@ -28,13 +28,13 @@ func TestIdentifyQueryType(t *testing.T) {
 			name: "Simple SELECT",
 			setupCatalog: func() *MockCatalog {
 				catalog := NewMockCatalog()
-
+				
 				// Create users table
 				users := NewTableMetadata("users")
 				users.AddColumn(NewColumnMetadata("id", DataTypeInteger))
 				users.AddColumn(NewColumnMetadata("name", DataTypeText))
 				users.AddColumn(NewColumnMetadata("age", DataTypeInteger))
-
+				
 				catalog.AddTable(users)
 				return catalog
 			},
@@ -60,11 +60,11 @@ func TestIdentifyQueryType(t *testing.T) {
 
 func TestDataTypes(t *testing.T) {
 	tests := []struct {
-		name        string
-		dataType    DataType
-		expectedStr string
-		isNumeric   bool
-		isString    bool
+		name         string
+		dataType     DataType
+		expectedStr  string
+		isNumeric    bool
+		isString     bool
 	}{
 		{"Integer", DataTypeInteger, "INTEGER", true, false},
 		{"Real", DataTypeReal, "REAL", true, false},
@@ -200,11 +200,11 @@ func TestMockCatalog(t *testing.T) {
 
 func TestQueryType(t *testing.T) {
 	tests := []struct {
-		queryType   QueryType
+		queryType QueryType
 		expectedStr string
-		isDML       bool
-		isDDL       bool
-		isTCL       bool
+		isDML bool
+		isDDL bool
+		isTCL bool
 	}{
 		{QueryTypeSelect, "SELECT", true, false, false},
 		{QueryTypeInsert, "INSERT", true, false, false},
@@ -324,10 +324,10 @@ func TestTypeInformation(t *testing.T) {
 
 func TestTypeCompatibility(t *testing.T) {
 	tests := []struct {
-		name          string
-		type1         DataType
-		type2         DataType
-		comparable    bool
+		name         string
+		type1        DataType
+		type2        DataType
+		comparable   bool
 		canCoerce1to2 bool
 	}{
 		{"Integer-Integer", DataTypeInteger, DataTypeInteger, true, true},

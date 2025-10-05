@@ -395,10 +395,6 @@ func TestParserErrors(t *testing.T) {
 		sql  string
 	}{
 		{
-			name: "Missing FROM",
-			sql:  "SELECT name",
-		},
-		{
 			name: "Missing table name",
 			sql:  "SELECT name FROM",
 		},

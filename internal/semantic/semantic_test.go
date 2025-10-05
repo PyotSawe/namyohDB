@@ -1,5 +1,4 @@
 package semantic
-package semantic
 
 import (
 	"testing"

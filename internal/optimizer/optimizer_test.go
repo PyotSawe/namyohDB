@@ -1,5 +1,4 @@
 package optimizer
-package optimizer
 
 import (
 	"testing"
@@ -141,8 +140,8 @@ func TestPhysicalPlanTypes(t *testing.T) {
 // TestLogicalPlan tests logical plan structure
 func TestLogicalPlan(t *testing.T) {
 	plan := &LogicalPlan{
-		Type:      PlanTypeScan,
-		TableName: "users",
+		Type:        PlanTypeScan,
+		TableName:   "users",
 		Cardinality: 1000,
 	}
 
